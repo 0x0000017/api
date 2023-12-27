@@ -100,7 +100,7 @@ class ParkingApi
         $sql = "SELECT * FROM tbl_parklogs";
 
         if ($filter) {
-            $sql .= " WHERE p_vtype = ?";
+            $sql .= " WHERE p_vtype = ? ORDER BY p_id DESC";
         }
 
         $stmt = $this->conn->prepare($sql);
@@ -219,13 +219,11 @@ class ParkingApi
         $vbrand = $data["vbrand"];
         $vmodel = $data["vmodel"];
         $plateNo = $data["plateNo"];
-        $parkTime = $data["parkTime"];
-        $parkDate = $data["parkDate"];
         $spot = $data["spot"];
         $vtype = $data["vtype"];
 
-        $stmt = $this->conn->prepare("INSERT INTO tbl_parklogs (p_name, p_phone, p_vbrand, p_vmodel, p_plateNo, p_time, p_date, p_spot, p_vtype) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sisssssss", $name, $phone, $vbrand, $vmodel, $plateNo, $parkTime, $parkDate, $spot, $vtype);
+        $stmt = $this->conn->prepare("INSERT INTO tbl_parklogs (p_name, p_phone, p_vbrand, p_vmodel, p_plateNo, p_time, p_date, p_spot, p_vtype) VALUES (?, ?, ?, ?, ?, CURRENT_TIME, CURRENT_DATE, ?, ?)");
+        $stmt->bind_param("sisssss", $name, $phone, $vbrand, $vmodel, $plateNo, $spot, $vtype);
 
         if ($stmt->execute()) {
             http_response_code(200);
@@ -248,10 +246,10 @@ class ParkingApi
 
         $logId = $data["p_id"];
         $status = $data["status"];
-        $out = $data["out"];
+        // $out = $data["out"];
 
-        $stmt = $this->conn->prepare("UPDATE tbl_parklogs SET status = ?, p_out = ? WHERE p_id = ?");
-        $stmt->bind_param("isi", $status, $out, $logId);
+        $stmt = $this->conn->prepare("UPDATE tbl_parklogs SET status = ?, p_out = CURRENT_TIMESTAMP WHERE p_id = ?");
+        $stmt->bind_param("ii", $status, $logId);
 
         if ($stmt->execute()) {
             http_response_code(200);
